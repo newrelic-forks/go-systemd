@@ -598,3 +598,43 @@ func unitPath(name string) dbus.ObjectPath {
 func unitName(dpath dbus.ObjectPath) string {
 	return pathBusUnescape(path.Base(string(dpath)))
 }
+
+type JobStatus struct {
+	Id       int
+	Unit     string
+	JobType  string
+	Status   string
+	JobPath  string
+	UnitPath string
+}
+
+// ListJobs returns an array with all currently queued jobs
+func (c *Conn) ListJobs() ([]JobStatus, error) {
+	return c.listJobsInternal(c.sysobj.Call("org.freedesktop.systemd1.Manager.ListJobs", 0).Store)
+}
+
+func (c *Conn) listJobsInternal(f storeFunc) ([]JobStatus, error) {
+	result := make([][]interface{}, 0)
+	err := f(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	resultInterface := make([]interface{}, len(result))
+	for i := range result {
+		resultInterface[i] = result[i]
+	}
+
+	status := make([]JobStatus, len(result))
+	statusInterface := make([]interface{}, len(status))
+	for i := range status {
+		statusInterface[i] = &status[i]
+	}
+
+	err = dbus.Store(resultInterface, statusInterface...)
+	if err != nil {
+		return nil, err
+	}
+
+	return status, nil
+}
