@@ -1,3 +1,6 @@
+> WARNING:
+> This fork will be deleted once upstream gets updated.
+
 # go-systemd
 
 [![Build Status](https://travis-ci.org/coreos/go-systemd.png?branch=master)](https://travis-ci.org/coreos/go-systemd)
